@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -7,53 +8,116 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub struct App {
-    state: AppState,
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct TodoItem {
+    id: u32,
+    text: String,
+    assignee: String,
+    date: String,
+    completed: bool,
 }
 
-#[derive(Clone, PartialEq, Debug)]
-enum AppState {
-    Hello,
-    World,
+#[wasm_bindgen]
+impl TodoItem {
+    #[wasm_bindgen(getter)]
+    pub fn id(&self) -> u32 {
+        self.id
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn text(&self) -> String {
+        self.text.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn assignee(&self) -> String {
+        self.assignee.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn date(&self) -> String {
+        self.date.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn completed(&self) -> bool {
+        self.completed
+    }
 }
 
-impl Default for App {
+#[wasm_bindgen]
+pub struct TodoApp {
+    todos: Vec<TodoItem>,
+    next_id: u32,
+}
+
+impl Default for TodoApp {
     fn default() -> Self {
         Self::new()
     }
 }
 
 #[wasm_bindgen]
-impl App {
+impl TodoApp {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> App {
-        App {
-            state: AppState::Hello,
+    pub fn new() -> TodoApp {
+        TodoApp {
+            todos: Vec::new(),
+            next_id: 1,
         }
     }
 
     #[wasm_bindgen]
-    pub fn get_display_text(&self) -> String {
-        match self.state {
-            AppState::Hello => "Hello".to_string(),
-            AppState::World => "World".to_string(),
-        }
-    }
-
-    #[wasm_bindgen]
-    pub fn get_button_text(&self) -> String {
-        match self.state {
-            AppState::Hello => "Continue".to_string(),
-            AppState::World => "Reset".to_string(),
-        }
-    }
-
-    #[wasm_bindgen]
-    pub fn handle_button_click(&mut self) {
-        self.state = match self.state {
-            AppState::Hello => AppState::World,
-            AppState::World => AppState::Hello,
+    pub fn add_todo(&mut self, text: &str, assignee: &str, date: &str) {
+        let todo = TodoItem {
+            id: self.next_id,
+            text: text.to_string(),
+            assignee: assignee.to_string(),
+            date: date.to_string(),
+            completed: false,
         };
+        self.todos.push(todo);
+        self.next_id += 1;
+        self.sort_todos();
+    }
+
+    #[wasm_bindgen]
+    pub fn toggle_todo(&mut self, id: u32) {
+        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
+            todo.completed = !todo.completed;
+        }
+        self.sort_todos();
+    }
+
+    #[wasm_bindgen]
+    pub fn get_todos_json(&self) -> String {
+        serde_json::to_string(&self.todos).unwrap_or_else(|_| "[]".to_string())
+    }
+
+    #[wasm_bindgen]
+    pub fn get_todo_count(&self) -> usize {
+        self.todos.len()
+    }
+
+    #[wasm_bindgen]
+    pub fn edit_todo(&mut self, id: u32, text: &str, assignee: &str, date: &str) -> bool {
+        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
+            todo.text = text.to_string();
+            todo.assignee = assignee.to_string();
+            todo.date = date.to_string();
+            self.sort_todos();
+            true
+        } else {
+            false
+        }
+    }
+
+    fn sort_todos(&mut self) {
+        self.todos.sort_by(|a, b| match (a.completed, b.completed) {
+            (true, false) => std::cmp::Ordering::Greater,
+            (false, true) => std::cmp::Ordering::Less,
+            _ => a.id.cmp(&b.id),
+        });
     }
 }
 
@@ -63,35 +127,83 @@ mod tests {
     use wasm_bindgen_test::*;
 
     #[test]
-    fn test_app_initial_state() {
-        let app = App::new();
-        assert_eq!(app.get_display_text(), "Hello");
-        assert_eq!(app.get_button_text(), "Continue");
+    fn test_todo_app_creation() {
+        let app = TodoApp::new();
+        assert_eq!(app.get_todo_count(), 0);
     }
 
     #[test]
-    fn test_button_click_transitions() {
-        let mut app = App::new();
+    fn test_add_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("Test task", "Joe", "2024-01-01");
+        assert_eq!(app.get_todo_count(), 1);
+    }
 
-        app.handle_button_click();
-        assert_eq!(app.get_display_text(), "World");
-        assert_eq!(app.get_button_text(), "Reset");
+    #[test]
+    fn test_toggle_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("Test task", "Joe", "2024-01-01");
+        app.toggle_todo(1);
 
-        app.handle_button_click();
-        assert_eq!(app.get_display_text(), "Hello");
-        assert_eq!(app.get_button_text(), "Continue");
+        let todos_json = app.get_todos_json();
+        assert!(todos_json.contains("\"completed\":true"));
+    }
+
+    #[test]
+    fn test_todo_sorting() {
+        let mut app = TodoApp::new();
+        app.add_todo("Task 1", "Joe", "2024-01-01");
+        app.add_todo("Task 2", "Shannon", "2024-01-02");
+
+        app.toggle_todo(1);
+
+        let todos_json = app.get_todos_json();
+        let todos: Vec<TodoItem> = serde_json::from_str(&todos_json).unwrap();
+
+        assert!(!todos[0].completed);
+        assert!(todos[1].completed);
     }
 
     #[wasm_bindgen_test]
-    fn test_wasm_app_creation() {
-        let app = App::new();
-        assert_eq!(app.get_display_text(), "Hello");
+    fn test_wasm_todo_creation() {
+        let app = TodoApp::new();
+        assert_eq!(app.get_todo_count(), 0);
     }
 
     #[wasm_bindgen_test]
-    fn test_wasm_state_transition() {
-        let mut app = App::new();
-        app.handle_button_click();
-        assert_eq!(app.get_display_text(), "World");
+    fn test_wasm_add_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("WASM task", "Shannon", "2024-01-01");
+        assert_eq!(app.get_todo_count(), 1);
+    }
+
+    #[test]
+    fn test_edit_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("Original task", "Joe", "2024-01-01");
+
+        let success = app.edit_todo(1, "Updated task", "Shannon", "2024-01-02");
+        assert!(success);
+
+        let todos_json = app.get_todos_json();
+        assert!(todos_json.contains("\"text\":\"Updated task\""));
+        assert!(todos_json.contains("\"assignee\":\"Shannon\""));
+        assert!(todos_json.contains("\"date\":\"2024-01-02\""));
+    }
+
+    #[test]
+    fn test_edit_nonexistent_todo() {
+        let mut app = TodoApp::new();
+        let success = app.edit_todo(999, "New text", "Joe", "2024-01-01");
+        assert!(!success);
+    }
+
+    #[wasm_bindgen_test]
+    fn test_wasm_edit_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("WASM task", "Joe", "2024-01-01");
+
+        let success = app.edit_todo(1, "Edited WASM task", "Shannon", "2024-01-02");
+        assert!(success);
     }
 }

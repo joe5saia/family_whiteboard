@@ -2,54 +2,332 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Hello WASM</title>
+    <title>Family Todo App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .todo-form {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .form-row label {
+            min-width: 80px;
+            font-weight: bold;
+        }
+        
+        .form-row input, .form-row select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .add-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .add-btn:hover {
+            background: #45a049;
+        }
+        
+        .todo-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .todo-item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .todo-item.completed {
+            opacity: 0.6;
+            background: #f0f0f0;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+        }
+        
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .todo-content {
+            flex: 1;
+        }
+        
+        .todo-text {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .todo-meta {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .assignee {
+            background: #e3f2fd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        
+        .assignee.joe {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .assignee.shannon {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+        
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .edit-btn, .save-btn, .cancel-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .edit-btn:hover, .save-btn:hover {
+            background: #1976D2;
+        }
+        
+        .cancel-btn {
+            background: #757575;
+        }
+        
+        .cancel-btn:hover {
+            background: #616161;
+        }
+        
+        .edit-form {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
+            gap: 8px;
         }
-        #display {
-            font-size: 2em;
-            margin-bottom: 20px;
+        
+        .edit-form input, .edit-form select {
+            padding: 4px 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
         }
-        button {
-            font-size: 1.2em;
-            padding: 10px 20px;
-            cursor: pointer;
+        
+        .edit-actions {
+            display: flex;
+            gap: 8px;
         }
     </style>
 </head>
 <body>
-    <div id="display">Hello</div>
-    <button id="button">Continue</button>
+    <div class="container">
+        <h1>Family Todo List</h1>
+        
+        <div class="todo-form">
+            <div class="form-row">
+                <label for="todoText">Task:</label>
+                <input type="text" id="todoText" placeholder="Enter a new task...">
+            </div>
+            <div class="form-row">
+                <label for="assignee">Assign to:</label>
+                <select id="assignee">
+                    <option value="Joe">Joe</option>
+                    <option value="Shannon">Shannon</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <label for="dueDate">Due Date:</label>
+                <input type="date" id="dueDate">
+            </div>
+            <button class="add-btn" onclick="addTodo()">Add Todo</button>
+        </div>
+        
+        <ul class="todo-list" id="todoList">
+            <div class="empty-state">No todos yet. Add one above!</div>
+        </ul>
+    </div>
 
     <script type="module">
-        import init, { App } from './pkg/hello_wasm.js';
+        import init, { TodoApp } from './pkg/hello_wasm.js';
+        
+        let app;
         
         async function run() {
             await init();
+            app = new TodoApp();
+            renderTodos();
+        }
+        
+        window.addTodo = function() {
+            const text = document.getElementById('todoText').value.trim();
+            const assignee = document.getElementById('assignee').value;
+            const date = document.getElementById('dueDate').value;
             
-            const app = new App();
-            const display = document.getElementById('display');
-            const button = document.getElementById('button');
-            
-            function updateUI() {
-                display.textContent = app.get_display_text();
-                button.textContent = app.get_button_text();
+            if (!text) {
+                alert('Please enter a task');
+                return;
             }
             
-            button.addEventListener('click', () => {
-                app.handle_button_click();
-                updateUI();
-            });
+            app.add_todo(text, assignee, date);
             
-            updateUI();
+            // Clear form
+            document.getElementById('todoText').value = '';
+            document.getElementById('dueDate').value = '';
+            
+            renderTodos();
+        };
+        
+        window.toggleTodo = function(id) {
+            app.toggle_todo(id);
+            renderTodos();
+        };
+        
+        window.editTodo = function(id) {
+            const todoItem = document.querySelector(`[data-id="${id}"]`);
+            const todos = JSON.parse(app.get_todos_json());
+            const todo = todos.find(t => t.id === id);
+            
+            if (!todo) return;
+            
+            todoItem.innerHTML = `
+                <input type="checkbox" class="todo-checkbox" 
+                       ${todo.completed ? 'checked' : ''} 
+                       onchange="toggleTodo(${todo.id})">
+                <div class="todo-content">
+                    <div class="edit-form">
+                        <input type="text" id="editText-${id}" value="${escapeHtml(todo.text)}">
+                        <select id="editAssignee-${id}">
+                            <option value="Joe" ${todo.assignee === 'Joe' ? 'selected' : ''}>Joe</option>
+                            <option value="Shannon" ${todo.assignee === 'Shannon' ? 'selected' : ''}>Shannon</option>
+                        </select>
+                        <input type="date" id="editDate-${id}" value="${todo.date}">
+                        <div class="edit-actions">
+                            <button class="save-btn" onclick="saveTodo(${id})">Save</button>
+                            <button class="cancel-btn" onclick="cancelEdit(${id})">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+        
+        window.saveTodo = function(id) {
+            const text = document.getElementById(`editText-${id}`).value.trim();
+            const assignee = document.getElementById(`editAssignee-${id}`).value;
+            const date = document.getElementById(`editDate-${id}`).value;
+            
+            if (!text) {
+                alert('Please enter a task');
+                return;
+            }
+            
+            app.edit_todo(id, text, assignee, date);
+            renderTodos();
+        };
+        
+        window.cancelEdit = function(id) {
+            renderTodos();
+        };
+        
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const todos = JSON.parse(app.get_todos_json());
+            
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div class="empty-state">No todos yet. Add one above!</div>';
+                return;
+            }
+            
+            todoList.innerHTML = todos.map(todo => `
+                <li class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
+                    <input type="checkbox" class="todo-checkbox" 
+                           ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleTodo(${todo.id})">
+                    <div class="todo-content">
+                        <div class="todo-text">${escapeHtml(todo.text)}</div>
+                        <div class="todo-meta">
+                            <span class="assignee ${todo.assignee.toLowerCase()}">${todo.assignee}</span>
+                            ${todo.date ? ` • Due: ${todo.date}` : ''}
+                        </div>
+                    </div>
+                    <div class="todo-actions">
+                        <button class="edit-btn" onclick="editTodo(${todo.id})">Edit</button>
+                    </div>
+                </li>
+            `).join('');
         }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Allow adding todos with Enter key
+        document.getElementById('todoText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
         
         run();
     </script>
