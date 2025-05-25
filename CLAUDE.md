@@ -25,7 +25,37 @@ python3 -m http.server 8000
 - `index.html` - HTML file that loads and uses the WASM module
 - `pkg/` - Generated WASM bindings (created after build)
 
+## Development Workflow
+
+Run these commands after every code change:
+
+1. Format code:
+```bash
+cargo fmt
+```
+
+2. Run linter:
+```bash
+cargo clippy
+```
+
+3. Run unit tests:
+```bash
+cargo test
+```
+
+4. Run WASM-specific tests:
+```bash
+wasm-pack test --node
+```
+
+5. Build WASM package:
+```bash
+wasm-pack build --target web
+```
+
 ## Dependencies
 
 - `wasm-bindgen` - Rust/WASM/JS bindings
 - `web-sys` - Web API bindings for Rust
+- `wasm-bindgen-test` - Testing framework for WASM

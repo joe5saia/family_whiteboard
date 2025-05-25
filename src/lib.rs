@@ -11,10 +11,16 @@ pub struct App {
     state: AppState,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 enum AppState {
     Hello,
     World,
+}
+
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[wasm_bindgen]
@@ -48,5 +54,44 @@ impl App {
             AppState::Hello => AppState::World,
             AppState::World => AppState::Hello,
         };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wasm_bindgen_test::*;
+
+    #[test]
+    fn test_app_initial_state() {
+        let app = App::new();
+        assert_eq!(app.get_display_text(), "Hello");
+        assert_eq!(app.get_button_text(), "Continue");
+    }
+
+    #[test]
+    fn test_button_click_transitions() {
+        let mut app = App::new();
+
+        app.handle_button_click();
+        assert_eq!(app.get_display_text(), "World");
+        assert_eq!(app.get_button_text(), "Reset");
+
+        app.handle_button_click();
+        assert_eq!(app.get_display_text(), "Hello");
+        assert_eq!(app.get_button_text(), "Continue");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_wasm_app_creation() {
+        let app = App::new();
+        assert_eq!(app.get_display_text(), "Hello");
+    }
+
+    #[wasm_bindgen_test]
+    fn test_wasm_state_transition() {
+        let mut app = App::new();
+        app.handle_button_click();
+        assert_eq!(app.get_display_text(), "World");
     }
 }
