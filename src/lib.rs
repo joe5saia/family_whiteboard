@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -95,6 +96,45 @@ impl TodoApp {
     }
 
     #[wasm_bindgen]
+    pub fn get_todos_grouped_by_date_json(&self) -> String {
+        let mut grouped: HashMap<String, Vec<&TodoItem>> = HashMap::new();
+
+        for todo in &self.todos {
+            let date_key = if todo.date.is_empty() {
+                "No Due Date".to_string()
+            } else {
+                todo.date.clone()
+            };
+            grouped.entry(date_key).or_default().push(todo);
+        }
+
+        // Sort each group by completion status and ID
+        for todos in grouped.values_mut() {
+            todos.sort_by(|a, b| match (a.completed, b.completed) {
+                (true, false) => std::cmp::Ordering::Greater,
+                (false, true) => std::cmp::Ordering::Less,
+                _ => a.id.cmp(&b.id),
+            });
+        }
+
+        // Convert to sorted date groups
+        let mut date_groups: Vec<(String, Vec<TodoItem>)> = grouped
+            .into_iter()
+            .map(|(date, todos)| (date, todos.into_iter().cloned().collect()))
+            .collect();
+
+        // Sort dates: "No Due Date" first, then chronologically
+        date_groups.sort_by(|a, b| match (a.0.as_str(), b.0.as_str()) {
+            ("No Due Date", "No Due Date") => std::cmp::Ordering::Equal,
+            ("No Due Date", _) => std::cmp::Ordering::Less,
+            (_, "No Due Date") => std::cmp::Ordering::Greater,
+            (date_a, date_b) => date_a.cmp(date_b),
+        });
+
+        serde_json::to_string(&date_groups).unwrap_or_else(|_| "[]".to_string())
+    }
+
+    #[wasm_bindgen]
     pub fn get_todo_count(&self) -> usize {
         self.todos.len()
     }
@@ -137,6 +177,16 @@ mod tests {
         let mut app = TodoApp::new();
         app.add_todo("Test task", "Joe", "2024-01-01");
         assert_eq!(app.get_todo_count(), 1);
+    }
+
+    #[test]
+    fn test_add_unassigned_todo() {
+        let mut app = TodoApp::new();
+        app.add_todo("Unassigned task", "Unassigned", "2024-01-01");
+        assert_eq!(app.get_todo_count(), 1);
+
+        let todos_json = app.get_todos_json();
+        assert!(todos_json.contains("\"assignee\":\"Unassigned\""));
     }
 
     #[test]

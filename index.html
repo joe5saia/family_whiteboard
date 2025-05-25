@@ -127,6 +127,11 @@
             color: #c2185b;
         }
         
+        .assignee.unassigned {
+            background: #f5f5f5;
+            color: #757575;
+        }
+        
         .empty-state {
             text-align: center;
             color: #666;
@@ -177,6 +182,262 @@
             display: flex;
             gap: 8px;
         }
+        
+        .date-group {
+            margin-bottom: 20px;
+        }
+        
+        .date-header {
+            background: #2196F3;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            user-select: none;
+        }
+        
+        .date-header:hover {
+            background: #1976D2;
+        }
+        
+        .date-header.collapsed {
+            margin-bottom: 0;
+            border-radius: 6px;
+        }
+        
+        .date-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .date-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        
+        .collapse-arrow {
+            transition: transform 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .collapse-arrow.collapsed {
+            transform: rotate(-90deg);
+        }
+        
+        .date-todos {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .date-todos.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .date-todos .todo-item {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+        
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-btn {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .filter-btn:hover {
+            background: #F57C00;
+        }
+        
+        .filter-btn.active {
+            background: #E65100;
+            box-shadow: 0 2px 8px rgba(230, 81, 0, 0.3);
+            border: 2px solid #FF6F00;
+        }
+        
+        .filter-btn.active:hover {
+            background: #D84315;
+        }
+        
+        .filter-badge {
+            background: #F44336;
+            color: white;
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            margin-left: 5px;
+            position: relative;
+            top: -1px;
+        }
+        
+        .filter-btn.active .filter-badge {
+            display: flex;
+        }
+        
+        .filter-status {
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .filter-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .filter-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .filter-modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .filter-header {
+            background: #2196F3;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .filter-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+        
+        .filter-body {
+            padding: 20px;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .filter-group select, .filter-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-range input {
+            flex: 1;
+        }
+        
+        .date-range span {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .clear-filters-btn, .apply-filters-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .clear-filters-btn {
+            background: #757575;
+            color: white;
+        }
+        
+        .clear-filters-btn:hover {
+            background: #616161;
+        }
+        
+        .apply-filters-btn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .apply-filters-btn:hover {
+            background: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -191,6 +452,7 @@
             <div class="form-row">
                 <label for="assignee">Assign to:</label>
                 <select id="assignee">
+                    <option value="Unassigned">Unassigned</option>
                     <option value="Joe">Joe</option>
                     <option value="Shannon">Shannon</option>
                 </select>
@@ -202,6 +464,55 @@
             <button class="add-btn" onclick="addTodo()">Add Todo</button>
         </div>
         
+        <div class="filter-section">
+            <button class="filter-btn" id="filterBtn" onclick="toggleFilterModal()">
+                🔍 Filter
+                <span class="filter-badge" id="filterBadge">0</span>
+            </button>
+            <div class="filter-status" id="filterStatus"></div>
+        </div>
+        
+        <!-- Filter Modal -->
+        <div class="filter-modal" id="filterModal">
+            <div class="filter-modal-content">
+                <div class="filter-header">
+                    <h3>Filter Todos</h3>
+                    <button class="close-btn" onclick="toggleFilterModal()">&times;</button>
+                </div>
+                <div class="filter-body">
+                    <div class="filter-group">
+                        <label>Assignee:</label>
+                        <select id="filterAssignee" onchange="applyFilters()">
+                            <option value="all">All</option>
+                            <option value="Unassigned">Unassigned</option>
+                            <option value="Joe">Joe</option>
+                            <option value="Shannon">Shannon</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="filterStatus" onchange="applyFilters()">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Due Date Range:</label>
+                        <div class="date-range">
+                            <input type="date" id="filterDateFrom" onchange="applyFilters()" placeholder="From">
+                            <span>to</span>
+                            <input type="date" id="filterDateTo" onchange="applyFilters()" placeholder="To">
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="clear-filters-btn" onclick="clearFilters()">Clear All</button>
+                        <button class="apply-filters-btn" onclick="toggleFilterModal()">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <ul class="todo-list" id="todoList">
             <div class="empty-state">No todos yet. Add one above!</div>
         </ul>
@@ -211,6 +522,12 @@
         import init, { TodoApp } from './pkg/hello_wasm.js';
         
         let app;
+        let currentFilters = {
+            assignee: 'all',
+            status: 'all',
+            dateFrom: '',
+            dateTo: ''
+        };
         
         async function run() {
             await init();
@@ -244,8 +561,12 @@
         
         window.editTodo = function(id) {
             const todoItem = document.querySelector(`[data-id="${id}"]`);
-            const todos = JSON.parse(app.get_todos_json());
-            const todo = todos.find(t => t.id === id);
+            const groupedTodos = JSON.parse(app.get_todos_grouped_by_date_json());
+            let todo = null;
+            for (const [date, todos] of groupedTodos) {
+                todo = todos.find(t => t.id === id);
+                if (todo) break;
+            }
             
             if (!todo) return;
             
@@ -257,6 +578,7 @@
                     <div class="edit-form">
                         <input type="text" id="editText-${id}" value="${escapeHtml(todo.text)}">
                         <select id="editAssignee-${id}">
+                            <option value="Unassigned" ${todo.assignee === 'Unassigned' ? 'selected' : ''}>Unassigned</option>
                             <option value="Joe" ${todo.assignee === 'Joe' ? 'selected' : ''}>Joe</option>
                             <option value="Shannon" ${todo.assignee === 'Shannon' ? 'selected' : ''}>Shannon</option>
                         </select>
@@ -290,30 +612,65 @@
         
         function renderTodos() {
             const todoList = document.getElementById('todoList');
-            const todos = JSON.parse(app.get_todos_json());
+            const groupedTodos = JSON.parse(app.get_todos_grouped_by_date_json());
             
-            if (todos.length === 0) {
-                todoList.innerHTML = '<div class="empty-state">No todos yet. Add one above!</div>';
+            // Apply filters to each date group
+            const filteredGroupedTodos = groupedTodos.map(([date, todos]) => {
+                const filteredTodos = filterTodos(todos);
+                return [date, filteredTodos];
+            }).filter(([date, todos]) => todos.length > 0); // Remove empty date groups
+            
+            if (filteredGroupedTodos.length === 0) {
+                const hasFilters = currentFilters.assignee !== 'all' || 
+                                 currentFilters.status !== 'all' || 
+                                 currentFilters.dateFrom || 
+                                 currentFilters.dateTo;
+                
+                if (hasFilters) {
+                    todoList.innerHTML = '<div class="empty-state">No todos match the current filters.</div>';
+                } else {
+                    todoList.innerHTML = '<div class="empty-state">No todos yet. Add one above!</div>';
+                }
                 return;
             }
             
-            todoList.innerHTML = todos.map(todo => `
-                <li class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
-                    <input type="checkbox" class="todo-checkbox" 
-                           ${todo.completed ? 'checked' : ''} 
-                           onchange="toggleTodo(${todo.id})">
-                    <div class="todo-content">
-                        <div class="todo-text">${escapeHtml(todo.text)}</div>
-                        <div class="todo-meta">
-                            <span class="assignee ${todo.assignee.toLowerCase()}">${todo.assignee}</span>
-                            ${todo.date ? ` • Due: ${todo.date}` : ''}
+            todoList.innerHTML = filteredGroupedTodos.map(([date, todos]) => {
+                const dateKey = date.replace(/[^a-zA-Z0-9]/g, '_');
+                const isCollapsed = localStorage.getItem(`collapsed_${dateKey}`) === 'true';
+                const completedCount = todos.filter(todo => todo.completed).length;
+                const totalCount = todos.length;
+                
+                return `
+                    <div class="date-group">
+                        <div class="date-header ${isCollapsed ? 'collapsed' : ''}" onclick="toggleDateGroup('${dateKey}')">
+                            <div class="date-title">${formatDateHeader(date)}</div>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="date-count">${completedCount}/${totalCount}</div>
+                                <div class="collapse-arrow ${isCollapsed ? 'collapsed' : ''}">▼</div>
+                            </div>
+                        </div>
+                        <div class="date-todos ${isCollapsed ? 'collapsed' : ''}" id="todos_${dateKey}">
+                            ${todos.map(todo => `
+                                <div class="todo-item ${todo.completed ? 'completed' : ''}" data-id="${todo.id}">
+                                    <input type="checkbox" class="todo-checkbox" 
+                                           ${todo.completed ? 'checked' : ''} 
+                                           onchange="toggleTodo(${todo.id})">
+                                    <div class="todo-content">
+                                        <div class="todo-text">${escapeHtml(todo.text)}</div>
+                                        <div class="todo-meta">
+                                            <span class="assignee ${todo.assignee.toLowerCase()}">${todo.assignee}</span>
+                                            ${todo.date ? ` • Due: ${todo.date}` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="todo-actions">
+                                        <button class="edit-btn" onclick="editTodo(${todo.id})">Edit</button>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-                    <div class="todo-actions">
-                        <button class="edit-btn" onclick="editTodo(${todo.id})">Edit</button>
-                    </div>
-                </li>
-            `).join('');
+                `;
+            }).join('');
         }
         
         function escapeHtml(text) {
@@ -322,10 +679,177 @@
             return div.innerHTML;
         }
         
+        function formatDateHeader(date) {
+            if (date === 'No Due Date') {
+                return 'No Due Date';
+            }
+            
+            try {
+                const dateObj = new Date(date + 'T00:00:00');
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (dateObj.toDateString() === today.toDateString()) {
+                    return 'Today';
+                } else if (dateObj.toDateString() === tomorrow.toDateString()) {
+                    return 'Tomorrow';
+                } else if (dateObj.toDateString() === yesterday.toDateString()) {
+                    return 'Yesterday';
+                } else {
+                    return dateObj.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                }
+            } catch (e) {
+                return date;
+            }
+        }
+        
+        window.toggleDateGroup = function(dateKey) {
+            const todosElement = document.getElementById(`todos_${dateKey}`);
+            const headerElement = document.querySelector(`[onclick="toggleDateGroup('${dateKey}')"]`);
+            const arrowElement = headerElement.querySelector('.collapse-arrow');
+            
+            const isCollapsed = todosElement.classList.contains('collapsed');
+            
+            if (isCollapsed) {
+                todosElement.classList.remove('collapsed');
+                headerElement.classList.remove('collapsed');
+                arrowElement.classList.remove('collapsed');
+                localStorage.setItem(`collapsed_${dateKey}`, 'false');
+            } else {
+                todosElement.classList.add('collapsed');
+                headerElement.classList.add('collapsed');
+                arrowElement.classList.add('collapsed');
+                localStorage.setItem(`collapsed_${dateKey}`, 'true');
+            }
+        };
+        
+        window.toggleFilterModal = function() {
+            const modal = document.getElementById('filterModal');
+            modal.classList.toggle('show');
+        };
+        
+        window.applyFilters = function() {
+            currentFilters.assignee = document.getElementById('filterAssignee').value;
+            currentFilters.status = document.getElementById('filterStatus').value;
+            currentFilters.dateFrom = document.getElementById('filterDateFrom').value;
+            currentFilters.dateTo = document.getElementById('filterDateTo').value;
+            
+            renderTodos();
+            updateFilterStatus();
+        };
+        
+        window.clearFilters = function() {
+            currentFilters = {
+                assignee: 'all',
+                status: 'all',
+                dateFrom: '',
+                dateTo: ''
+            };
+            
+            document.getElementById('filterAssignee').value = 'all';
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            
+            renderTodos();
+            updateFilterStatus();
+        };
+        
+        function updateFilterStatus() {
+            const statusEl = document.getElementById('filterStatus');
+            const filterBtn = document.getElementById('filterBtn');
+            const filterBadge = document.getElementById('filterBadge');
+            const activeFilters = [];
+            
+            if (currentFilters.assignee !== 'all') {
+                activeFilters.push(`Assignee: ${currentFilters.assignee}`);
+            }
+            if (currentFilters.status !== 'all') {
+                activeFilters.push(`Status: ${currentFilters.status}`);
+            }
+            if (currentFilters.dateFrom || currentFilters.dateTo) {
+                const fromDate = currentFilters.dateFrom || 'any';
+                const toDate = currentFilters.dateTo || 'any';
+                activeFilters.push(`Date: ${fromDate} to ${toDate}`);
+            }
+            
+            // Update filter button visual state
+            if (activeFilters.length > 0) {
+                filterBtn.classList.add('active');
+                filterBadge.textContent = activeFilters.length;
+                statusEl.textContent = `Active filters: ${activeFilters.join(', ')}`;
+            } else {
+                filterBtn.classList.remove('active');
+                filterBadge.textContent = '0';
+                statusEl.textContent = '';
+            }
+        }
+        
+        function filterTodos(todos) {
+            return todos.filter(todo => {
+                // Filter by assignee
+                if (currentFilters.assignee !== 'all' && todo.assignee !== currentFilters.assignee) {
+                    return false;
+                }
+                
+                // Filter by status
+                if (currentFilters.status !== 'all') {
+                    const isCompleted = todo.completed;
+                    if (currentFilters.status === 'completed' && !isCompleted) {
+                        return false;
+                    }
+                    if (currentFilters.status === 'pending' && isCompleted) {
+                        return false;
+                    }
+                }
+                
+                // Filter by date range
+                if (currentFilters.dateFrom || currentFilters.dateTo) {
+                    if (!todo.date) {
+                        // If todo has no date, only include if no date range is specified
+                        return !currentFilters.dateFrom && !currentFilters.dateTo;
+                    }
+                    
+                    const todoDate = new Date(todo.date + 'T00:00:00');
+                    
+                    if (currentFilters.dateFrom) {
+                        const fromDate = new Date(currentFilters.dateFrom + 'T00:00:00');
+                        if (todoDate < fromDate) {
+                            return false;
+                        }
+                    }
+                    
+                    if (currentFilters.dateTo) {
+                        const toDate = new Date(currentFilters.dateTo + 'T23:59:59');
+                        if (todoDate > toDate) {
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            });
+        }
+        
         // Allow adding todos with Enter key
         document.getElementById('todoText').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 addTodo();
+            }
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('filterModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleFilterModal();
             }
         });
         
