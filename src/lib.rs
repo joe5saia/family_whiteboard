@@ -8,6 +8,8 @@ extern "C" {
     fn log(s: &str);
 }
 
+const NO_DUE_DATE_GROUP: &str = "No Due Date";
+
 #[wasm_bindgen]
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TodoItem {
@@ -16,6 +18,36 @@ pub struct TodoItem {
     assignee: String,
     date: String,
     completed: bool,
+}
+
+impl TodoItem {
+    fn new(id: u32, text: &str, assignee: &str, date: &str) -> Self {
+        Self {
+            id,
+            text: text.to_string(),
+            assignee: assignee.to_string(),
+            date: date.to_string(),
+            completed: false,
+        }
+    }
+
+    fn toggle_completion(&mut self) {
+        self.completed = !self.completed;
+    }
+
+    fn update(&mut self, text: &str, assignee: &str, date: &str) {
+        self.text = text.to_string();
+        self.assignee = assignee.to_string();
+        self.date = date.to_string();
+    }
+
+    fn date_group_key(&self) -> String {
+        if self.date.is_empty() {
+            NO_DUE_DATE_GROUP.to_string()
+        } else {
+            self.date.clone()
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -70,13 +102,7 @@ impl TodoApp {
 
     #[wasm_bindgen]
     pub fn add_todo(&mut self, text: &str, assignee: &str, date: &str) {
-        let todo = TodoItem {
-            id: self.next_id,
-            text: text.to_string(),
-            assignee: assignee.to_string(),
-            date: date.to_string(),
-            completed: false,
-        };
+        let todo = TodoItem::new(self.next_id, text, assignee, date);
         self.todos.push(todo);
         self.next_id += 1;
         self.sort_todos();
@@ -84,10 +110,10 @@ impl TodoApp {
 
     #[wasm_bindgen]
     pub fn toggle_todo(&mut self, id: u32) {
-        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
-            todo.completed = !todo.completed;
+        if let Some(todo) = self.find_todo_by_id_mut(id) {
+            todo.toggle_completion();
+            self.sort_todos();
         }
-        self.sort_todos();
     }
 
     #[wasm_bindgen]
@@ -97,41 +123,9 @@ impl TodoApp {
 
     #[wasm_bindgen]
     pub fn get_todos_grouped_by_date_json(&self) -> String {
-        let mut grouped: HashMap<String, Vec<&TodoItem>> = HashMap::new();
-
-        for todo in &self.todos {
-            let date_key = if todo.date.is_empty() {
-                "No Due Date".to_string()
-            } else {
-                todo.date.clone()
-            };
-            grouped.entry(date_key).or_default().push(todo);
-        }
-
-        // Sort each group by completion status and ID
-        for todos in grouped.values_mut() {
-            todos.sort_by(|a, b| match (a.completed, b.completed) {
-                (true, false) => std::cmp::Ordering::Greater,
-                (false, true) => std::cmp::Ordering::Less,
-                _ => a.id.cmp(&b.id),
-            });
-        }
-
-        // Convert to sorted date groups
-        let mut date_groups: Vec<(String, Vec<TodoItem>)> = grouped
-            .into_iter()
-            .map(|(date, todos)| (date, todos.into_iter().cloned().collect()))
-            .collect();
-
-        // Sort dates: "No Due Date" first, then chronologically
-        date_groups.sort_by(|a, b| match (a.0.as_str(), b.0.as_str()) {
-            ("No Due Date", "No Due Date") => std::cmp::Ordering::Equal,
-            ("No Due Date", _) => std::cmp::Ordering::Less,
-            (_, "No Due Date") => std::cmp::Ordering::Greater,
-            (date_a, date_b) => date_a.cmp(date_b),
-        });
-
-        serde_json::to_string(&date_groups).unwrap_or_else(|_| "[]".to_string())
+        let grouped = self.group_todos_by_date();
+        let sorted_groups = self.sort_date_groups(grouped);
+        serde_json::to_string(&sorted_groups).unwrap_or_else(|_| "[]".to_string())
     }
 
     #[wasm_bindgen]
@@ -141,10 +135,8 @@ impl TodoApp {
 
     #[wasm_bindgen]
     pub fn edit_todo(&mut self, id: u32, text: &str, assignee: &str, date: &str) -> bool {
-        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
-            todo.text = text.to_string();
-            todo.assignee = assignee.to_string();
-            todo.date = date.to_string();
+        if let Some(todo) = self.find_todo_by_id_mut(id) {
+            todo.update(text, assignee, date);
             self.sort_todos();
             true
         } else {
@@ -152,12 +144,61 @@ impl TodoApp {
         }
     }
 
-    fn sort_todos(&mut self) {
-        self.todos.sort_by(|a, b| match (a.completed, b.completed) {
+    fn find_todo_by_id_mut(&mut self, id: u32) -> Option<&mut TodoItem> {
+        self.todos.iter_mut().find(|todo| todo.id == id)
+    }
+
+    fn group_todos_by_date(&self) -> HashMap<String, Vec<&TodoItem>> {
+        let mut grouped: HashMap<String, Vec<&TodoItem>> = HashMap::new();
+
+        for todo in &self.todos {
+            let date_key = todo.date_group_key();
+            grouped.entry(date_key).or_default().push(todo);
+        }
+
+        // Sort todos within each group
+        for todos in grouped.values_mut() {
+            todos.sort_by(|a, b| Self::compare_todos_for_sorting(a, b));
+        }
+
+        grouped
+    }
+
+    fn sort_date_groups(
+        &self,
+        grouped: HashMap<String, Vec<&TodoItem>>,
+    ) -> Vec<(String, Vec<TodoItem>)> {
+        let mut date_groups: Vec<(String, Vec<TodoItem>)> = grouped
+            .into_iter()
+            .map(|(date, todos)| (date, todos.into_iter().cloned().collect()))
+            .collect();
+
+        date_groups.sort_by(Self::compare_date_groups);
+        date_groups
+    }
+
+    fn compare_todos_for_sorting(a: &TodoItem, b: &TodoItem) -> std::cmp::Ordering {
+        match (a.completed, b.completed) {
             (true, false) => std::cmp::Ordering::Greater,
             (false, true) => std::cmp::Ordering::Less,
             _ => a.id.cmp(&b.id),
-        });
+        }
+    }
+
+    fn compare_date_groups(
+        a: &(String, Vec<TodoItem>),
+        b: &(String, Vec<TodoItem>),
+    ) -> std::cmp::Ordering {
+        match (a.0.as_str(), b.0.as_str()) {
+            (NO_DUE_DATE_GROUP, NO_DUE_DATE_GROUP) => std::cmp::Ordering::Equal,
+            (NO_DUE_DATE_GROUP, _) => std::cmp::Ordering::Less,
+            (_, NO_DUE_DATE_GROUP) => std::cmp::Ordering::Greater,
+            (date_a, date_b) => date_a.cmp(date_b),
+        }
+    }
+
+    fn sort_todos(&mut self) {
+        self.todos.sort_by(Self::compare_todos_for_sorting);
     }
 }
 

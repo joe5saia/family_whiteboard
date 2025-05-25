@@ -1,0 +1,446 @@
+/* Family Todo App Styles */
+
+/* Base Styles */
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+/* Form Styles */
+.todo-form {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 30px;
+}
+
+.form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.form-row label {
+    min-width: 80px;
+    font-weight: bold;
+}
+
+.form-row input, .form-row select {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Button Styles */
+.add-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-btn:hover {
+    background: #45a049;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.edit-btn:hover, .save-btn:hover {
+    background: #1976D2;
+}
+
+.cancel-btn {
+    background: #757575;
+}
+
+.cancel-btn:hover {
+    background: #616161;
+}
+
+/* Todo List Styles */
+.todo-list {
+    list-style: none;
+    padding: 0;
+}
+
+.todo-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+    background: #f0f0f0;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+}
+
+.todo-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.todo-content {
+    flex: 1;
+}
+
+.todo-text {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.todo-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+.todo-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Assignee Badge Styles */
+.assignee {
+    background: #e3f2fd;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.assignee.joe {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.assignee.shannon {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.assignee.unassigned {
+    background: #f5f5f5;
+    color: #757575;
+}
+
+/* Edit Form Styles */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-form input, .edit-form select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Date Group Styles */
+.date-group {
+    margin-bottom: 20px;
+}
+
+.date-header {
+    background: #2196F3;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    user-select: none;
+}
+
+.date-header:hover {
+    background: #1976D2;
+}
+
+.date-header.collapsed {
+    margin-bottom: 0;
+    border-radius: 6px;
+}
+
+.date-title {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.date-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.collapse-arrow {
+    transition: transform 0.3s ease;
+    font-size: 14px;
+}
+
+.collapse-arrow.collapsed {
+    transform: rotate(-90deg);
+}
+
+.date-todos {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    overflow: hidden;
+}
+
+.date-todos.collapsed {
+    max-height: 0;
+    opacity: 0;
+}
+
+.date-todos .todo-item {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+/* Filter Styles */
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.filter-btn {
+    background: #FF9800;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-btn:hover {
+    background: #F57C00;
+}
+
+.filter-btn.active {
+    background: #E65100;
+    box-shadow: 0 2px 8px rgba(230, 81, 0, 0.3);
+    border: 2px solid #FF6F00;
+}
+
+.filter-btn.active:hover {
+    background: #D84315;
+}
+
+.filter-badge {
+    background: #F44336;
+    color: white;
+    border-radius: 50%;
+    min-width: 18px;
+    height: 18px;
+    font-size: 12px;
+    font-weight: bold;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    position: relative;
+    top: -1px;
+}
+
+.filter-btn.active .filter-badge {
+    display: flex;
+}
+
+.filter-status {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Filter Modal Styles */
+.filter-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.filter-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.filter-header {
+    background: #2196F3;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.filter-body {
+    padding: 20px;
+}
+
+.filter-group {
+    margin-bottom: 20px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.filter-group select, .filter-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-range input {
+    flex: 1;
+}
+
+.date-range span {
+    color: #666;
+    font-size: 14px;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.clear-filters-btn, .apply-filters-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.clear-filters-btn {
+    background: #757575;
+    color: white;
+}
+
+.clear-filters-btn:hover {
+    background: #616161;
+}
+
+.apply-filters-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.apply-filters-btn:hover {
+    background: #45a049;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 40px;
+}
