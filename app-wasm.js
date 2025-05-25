@@ -1,11 +1,10 @@
-// Family Todo App JavaScript Module - Backend API Version
+// Family Todo App JavaScript Module
 
-import TodoApiClient from './api-client.js';
+import init, { TodoApp } from './pkg/hello_wasm.js';
 
 class TodoAppController {
     constructor() {
-        this.apiClient = new TodoApiClient();
-        this.todosData = [];
+        this.app = null;
         this.currentFilters = {
             assignee: 'all',
             status: 'all',
@@ -15,9 +14,10 @@ class TodoAppController {
     }
 
     async initialize() {
+        await init();
+        this.app = new TodoApp();
         this.setupEventListeners();
-        this.setupWebSocket();
-        await this.loadTodos();
+        this.renderTodos();
     }
 
     setupEventListeners() {
@@ -36,56 +36,8 @@ class TodoAppController {
         });
     }
 
-    setupWebSocket() {
-        // Set up real-time WebSocket listeners
-        this.apiClient.on('todo_created', (todo) => {
-            console.log('Todo created:', todo);
-            this.loadTodos(); // Refresh the list
-        });
-
-        this.apiClient.on('todo_updated', (todo) => {
-            console.log('Todo updated:', todo);
-            this.loadTodos(); // Refresh the list
-        });
-
-        this.apiClient.on('todo_toggled', (todo) => {
-            console.log('Todo toggled:', todo);
-            this.loadTodos(); // Refresh the list
-        });
-
-        this.apiClient.on('todo_deleted', (data) => {
-            console.log('Todo deleted:', data);
-            this.loadTodos(); // Refresh the list
-        });
-
-        this.apiClient.on('connected', () => {
-            console.log('Real-time connection established');
-        });
-
-        this.apiClient.on('disconnected', () => {
-            console.log('Real-time connection lost');
-        });
-
-        // Connect to WebSocket
-        this.apiClient.connectWebSocket();
-    }
-
-    // Data loading
-    async loadTodos() {
-        try {
-            const groupedTodos = await this.apiClient.getTodos();
-            this.todosData = this.apiClient.transformTodosGroupedFromBackend(groupedTodos);
-            this.renderTodos();
-        } catch (error) {
-            console.error('Failed to load todos:', error);
-            // Fallback to empty state
-            this.todosData = [];
-            this.renderTodos();
-        }
-    }
-
     // Todo Management Methods
-    async addTodo() {
+    addTodo() {
         const text = document.getElementById('todoText').value.trim();
         const assignee = document.getElementById('assignee').value;
         const date = document.getElementById('dueDate').value;
@@ -95,24 +47,14 @@ class TodoAppController {
             return;
         }
         
-        try {
-            await this.apiClient.createTodo(text, assignee, date);
-            this.clearForm();
-            // The WebSocket will trigger a refresh automatically
-        } catch (error) {
-            console.error('Failed to create todo:', error);
-            alert('Failed to create todo. Please try again.');
-        }
+        this.app.add_todo(text, assignee, date);
+        this.clearForm();
+        this.renderTodos();
     }
 
-    async toggleTodo(id) {
-        try {
-            await this.apiClient.toggleTodo(id);
-            // The WebSocket will trigger a refresh automatically
-        } catch (error) {
-            console.error('Failed to toggle todo:', error);
-            alert('Failed to update todo. Please try again.');
-        }
+    toggleTodo(id) {
+        this.app.toggle_todo(id);
+        this.renderTodos();
     }
 
     editTodo(id) {
@@ -124,7 +66,7 @@ class TodoAppController {
         todoItem.innerHTML = this.generateEditForm(todo);
     }
 
-    async saveTodo(id) {
+    saveTodo(id) {
         const text = document.getElementById(`editText-${id}`).value.trim();
         const assignee = document.getElementById(`editAssignee-${id}`).value;
         const date = document.getElementById(`editDate-${id}`).value;
@@ -134,13 +76,8 @@ class TodoAppController {
             return;
         }
         
-        try {
-            await this.apiClient.updateTodo(id, { text, assignee, date });
-            // The WebSocket will trigger a refresh automatically
-        } catch (error) {
-            console.error('Failed to update todo:', error);
-            alert('Failed to update todo. Please try again.');
-        }
+        this.app.edit_todo(id, text, assignee, date);
+        this.renderTodos();
     }
 
     cancelEdit() {
@@ -149,7 +86,8 @@ class TodoAppController {
 
     // Helper Methods
     findTodoById(id) {
-        for (const [date, todos] of this.todosData) {
+        const groupedTodos = JSON.parse(this.app.get_todos_grouped_by_date_json());
+        for (const [date, todos] of groupedTodos) {
             const todo = todos.find(t => t.id === id);
             if (todo) return todo;
         }
@@ -161,10 +99,12 @@ class TodoAppController {
         document.getElementById('dueDate').value = '';
     }
 
-    // Rendering Methods (keeping most of the existing logic)
+    // Rendering Methods
     renderTodos() {
         const todoList = document.getElementById('todoList');
-        const filteredGroupedTodos = this.applyFiltersToGroups(this.todosData);
+        const groupedTodos = JSON.parse(this.app.get_todos_grouped_by_date_json());
+        
+        const filteredGroupedTodos = this.applyFiltersToGroups(groupedTodos);
         
         if (filteredGroupedTodos.length === 0) {
             todoList.innerHTML = this.generateEmptyState();
