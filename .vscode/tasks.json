@@ -1,0 +1,69 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Dev Environment",
+            "type": "shell",
+            "command": "./dev.sh start",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Stop Dev Environment",
+            "type": "shell",
+            "command": "./dev.sh stop",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "View Logs",
+            "type": "shell",
+            "command": "./dev.sh logs",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Backend Logs",
+            "type": "shell",
+            "command": "./dev.sh logs backend",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Frontend Logs",
+            "type": "shell",
+            "command": "./dev.sh logs frontend",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Migrations",
+            "type": "shell",
+            "command": "./dev.sh migrate",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}

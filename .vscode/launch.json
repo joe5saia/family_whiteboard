@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Backend (Docker)",
+            "type": "lldb",
+            "request": "attach",
+            "program": "${workspaceFolder}/backend/target/debug/family-todo-backend",
+            "pid": "${command:pickProcess}",
+            "sourceMap": {
+                "/app": "${workspaceFolder}/backend"
+            }
+        },
+        {
+            "name": "Frontend (Chrome)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:8080",
+            "webRoot": "${workspaceFolder}/frontend",
+            "sourceMaps": true
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full Stack",
+            "configurations": ["Frontend (Chrome)", "Debug Backend (Docker)"],
+            "stopAll": true
+        }
+    ]
+}

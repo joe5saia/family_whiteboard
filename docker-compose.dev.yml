@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=family_todos
+      - POSTGRES_USER=todo_user
+      - POSTGRES_PASSWORD=todo_password
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d family_todos"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Backend API with hot reload
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount source code for hot reloading
+      - ./backend/src:/app/src:delegated
+      - ./backend/Cargo.toml:/app/Cargo.toml:delegated
+      - ./backend/Cargo.lock:/app/Cargo.lock:delegated
+      - ./backend/migrations:/app/migrations:delegated
+      # Cache cargo dependencies
+      - cargo_cache:/usr/local/cargo/registry
+      - cargo_git:/usr/local/cargo/git
+      - backend_target:/app/target
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://todo_user:todo_password@postgres:5432/family_todos
+      - RUST_LOG=debug
+      - RUST_BACKTRACE=1
+      - CARGO_HOME=/usr/local/cargo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["cargo", "watch", "-x", "run"]
+
+  # Frontend with live reload
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount frontend source for hot reloading
+      - ./frontend:/usr/share/nginx/html:delegated
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    environment:
+      - NGINX_ENVSUBST_OUTPUT_DIR=/etc/nginx
+
+  # Optional: Database admin interface
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+      - ADMINER_DEFAULT_DB=family_todos
+      - ADMINER_DEFAULT_USERNAME=todo_user
+    depends_on:
+      - postgres
+
+  # Optional: Backend API documentation (if using)
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8082:8080"
+    environment:
+      - SWAGGER_JSON_URL=http://backend:3000/swagger.json
+    depends_on:
+      - backend
+    profiles:
+      - docs
+
+volumes:
+  postgres_data_dev:
+  cargo_cache:
+  cargo_git:
+  backend_target:
+
+networks:
+  default:
+    driver: bridge

@@ -1,3 +1,17 @@
 /target
 backend/.env
 backend/target
+
+# Development environment
+.env.development
+*.log
+.env.local
+
+# VS Code
+.vscode/settings.json
+
+# Docker volumes
+postgres_data_dev/
+cargo_cache/
+cargo_git/
+backend_target/

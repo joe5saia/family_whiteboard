@@ -1,9 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
-use sqlx::postgres::{PgPool, PgRow};
-use sqlx::{Row, FromRow};
-use chrono::{DateTime, Utc};
 
 #[wasm_bindgen]
 extern "C" {
@@ -14,17 +11,13 @@ extern "C" {
 const NO_DUE_DATE_GROUP: &str = "No Due Date";
 
 #[wasm_bindgen]
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromRow)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TodoItem {
     id: u32,
     text: String,
     assignee: String,
     date: String,
     completed: bool,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    created_at: Option<DateTime<Utc>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    updated_at: Option<DateTime<Utc>>,
 }
 
 impl TodoItem {
@@ -35,8 +28,6 @@ impl TodoItem {
             assignee: assignee.to_string(),
             date: date.to_string(),
             completed: false,
-            created_at: None,
-            updated_at: None,
         }
     }
 
@@ -91,8 +82,6 @@ impl TodoItem {
 pub struct TodoApp {
     todos: Vec<TodoItem>,
     next_id: u32,
-    #[wasm_bindgen(skip)]
-    db_pool: Option<PgPool>,
 }
 
 impl Default for TodoApp {
@@ -108,41 +97,7 @@ impl TodoApp {
         TodoApp {
             todos: Vec::new(),
             next_id: 1,
-            db_pool: None,
         }
-    }
-
-    pub async fn new_with_db(database_url: &str) -> Result<TodoApp, sqlx::Error> {
-        let pool = PgPool::connect(database_url).await?;
-        
-        // Run migrations
-        sqlx::migrate!("./migrations").run(&pool).await?;
-        
-        let mut app = TodoApp {
-            todos: Vec::new(),
-            next_id: 1,
-            db_pool: Some(pool),
-        };
-        
-        app.load_todos_from_db().await?;
-        Ok(app)
-    }
-
-    async fn load_todos_from_db(&mut self) -> Result<(), sqlx::Error> {
-        if let Some(pool) = &self.db_pool {
-            let todos: Vec<TodoItem> = sqlx::query_as::<_, TodoItem>(
-                "SELECT id, text, assignee, date, completed, created_at, updated_at FROM todos ORDER BY id"
-            )
-            .fetch_all(pool)
-            .await?;
-            
-            self.todos = todos;
-            
-            if let Some(last_todo) = self.todos.last() {
-                self.next_id = last_todo.id + 1;
-            }
-        }
-        Ok(())
     }
 
     #[wasm_bindgen]
@@ -153,56 +108,11 @@ impl TodoApp {
         self.sort_todos();
     }
 
-    pub async fn add_todo_async(&mut self, text: &str, assignee: &str, date: &str) -> Result<u32, sqlx::Error> {
-        let todo_id = self.next_id;
-        
-        if let Some(pool) = &self.db_pool {
-            sqlx::query(
-                "INSERT INTO todos (id, text, assignee, date, completed) VALUES ($1, $2, $3, $4, $5)"
-            )
-            .bind(todo_id as i32)
-            .bind(text)
-            .bind(assignee)
-            .bind(date)
-            .bind(false)
-            .execute(pool)
-            .await?;
-        }
-        
-        let todo = TodoItem::new(todo_id, text, assignee, date);
-        self.todos.push(todo);
-        self.next_id += 1;
-        self.sort_todos();
-        
-        Ok(todo_id)
-    }
-
     #[wasm_bindgen]
     pub fn toggle_todo(&mut self, id: u32) {
         if let Some(todo) = self.find_todo_by_id_mut(id) {
             todo.toggle_completion();
             self.sort_todos();
-        }
-    }
-
-    pub async fn toggle_todo_async(&mut self, id: u32) -> Result<bool, sqlx::Error> {
-        if let Some(todo) = self.find_todo_by_id_mut(id) {
-            todo.toggle_completion();
-            
-            if let Some(pool) = &self.db_pool {
-                sqlx::query(
-                    "UPDATE todos SET completed = $1 WHERE id = $2"
-                )
-                .bind(todo.completed)
-                .bind(id as i32)
-                .execute(pool)
-                .await?;
-            }
-            
-            self.sort_todos();
-            Ok(true)
-        } else {
-            Ok(false)
         }
     }
 
@@ -231,48 +141,6 @@ impl TodoApp {
             true
         } else {
             false
-        }
-    }
-
-    pub async fn edit_todo_async(&mut self, id: u32, text: &str, assignee: &str, date: &str) -> Result<bool, sqlx::Error> {
-        if let Some(todo) = self.find_todo_by_id_mut(id) {
-            todo.update(text, assignee, date);
-            
-            if let Some(pool) = &self.db_pool {
-                sqlx::query(
-                    "UPDATE todos SET text = $1, assignee = $2, date = $3 WHERE id = $4"
-                )
-                .bind(text)
-                .bind(assignee)
-                .bind(date)
-                .bind(id as i32)
-                .execute(pool)
-                .await?;
-            }
-            
-            self.sort_todos();
-            Ok(true)
-        } else {
-            Ok(false)
-        }
-    }
-
-    pub async fn delete_todo_async(&mut self, id: u32) -> Result<bool, sqlx::Error> {
-        if let Some(pool) = &self.db_pool {
-            let result = sqlx::query("DELETE FROM todos WHERE id = $1")
-                .bind(id as i32)
-                .execute(pool)
-                .await?;
-                
-            if result.rows_affected() > 0 {
-                self.todos.retain(|todo| todo.id != id);
-                Ok(true)
-            } else {
-                Ok(false)
-            }
-        } else {
-            self.todos.retain(|todo| todo.id != id);
-            Ok(true)
         }
     }
 
