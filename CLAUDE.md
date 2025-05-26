@@ -9,15 +9,24 @@ A modern web application built with Rust + WebAssembly for the backend logic and
 - 📅 Set due dates and organize by date groups
 - 🔍 Filter todos by assignee, status, and date range
 - 💾 Persistent collapsible date groups (localStorage)
+- 🗄️ PostgreSQL database storage with full CRUD operations
+- 🐳 Fully containerized with Docker and Docker Compose
 - 🎨 Responsive design with modern UI
 
 ## Architecture
 
 ### Backend (Rust + WASM)
 - **`src/lib.rs`** - Core todo logic compiled to WebAssembly
-  - `TodoItem` struct with serialization support
-  - `TodoApp` for managing todo state and operations
+  - `TodoItem` struct with serialization support and database persistence
+  - `TodoApp` for managing todo state and operations with SQLite integration
+  - Async database operations for full CRUD functionality
   - Comprehensive test suite with both unit and WASM tests
+
+### Database
+- **PostgreSQL** - Production-grade relational database with ACID compliance
+- **`migrations/`** - SQL migration files for database schema management
+- **Async operations** - Non-blocking database interactions using SQLx
+- **Connection pooling** - Efficient database connection management
 
 ### Frontend
 - **`index.html`** - Clean HTML structure with semantic markup
@@ -27,14 +36,39 @@ A modern web application built with Rust + WebAssembly for the backend logic and
 ### Generated Files
 - **`pkg/`** - WASM bindings and JavaScript glue code (auto-generated)
 
+### Containerization
+- **`Dockerfile`** - Multi-stage build for optimized production container
+- **`docker-compose.yml`** - Full-stack orchestration with PostgreSQL database
+- **`nginx.conf`** - Web server configuration with WASM MIME type support
+- **`.dockerignore`** - Optimized build context exclusions
+- **`.env.example`** - Environment configuration template
+
 ## Setup and Development
 
-### Initial Build
+### Docker Development (Recommended)
+
+**Quick Start:**
+```bash
+docker-compose up --build
+```
+Then open http://localhost:8080
+
+**With Database Admin Interface:**
+```bash
+docker-compose --profile admin up --build
+```
+- App: http://localhost:8080
+- Database Admin: http://localhost:8081 (Adminer)
+- PostgreSQL: localhost:5432
+
+### Local Development
+
+**Initial Build:**
 ```bash
 wasm-pack build --target web
 ```
 
-### Local Development Server
+**Local Development Server:**
 ```bash
 python3 -m http.server 8000
 ```
@@ -111,11 +145,15 @@ Styles are organized by component:
 - `serde` + `serde_json` - Serialization for data exchange
 - `web-sys` - Web API bindings
 - `wasm-bindgen-test` - WASM-specific testing
+- `sqlx` - Async SQL toolkit with PostgreSQL support
+- `tokio` - Async runtime for database operations
+- `chrono` - Date and time handling with serialization
 
-### Browser Requirements
-- Modern browser with ES6 module support
-- WebAssembly support
-- localStorage for persistence
+### System Requirements
+- **Development**: Rust 1.75+, Docker, Docker Compose
+- **Browser**: Modern browser with ES6 module support and WebAssembly
+- **Database**: PostgreSQL 16 (containerized)
+- **Local Storage**: For UI state persistence (collapsible groups)
 
 ## Testing
 

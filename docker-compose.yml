@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=family_todos
+      - POSTGRES_USER=todo_user
+      - POSTGRES_PASSWORD=todo_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d family_todos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Main web application
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - DATABASE_URL=postgresql://todo_user:todo_password@postgres:5432/family_todos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Optional: Database web interface for management
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+      - ADMINER_DEFAULT_DB=family_todos
+      - ADMINER_DEFAULT_USERNAME=todo_user
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    profiles:
+      - admin
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,34 @@
+# Version control
+.git
+.gitignore
+
+# Rust build artifacts
+target/
+Cargo.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules (if any)
+node_modules/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+
+# Documentation
+README.md
+docs/
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose*.yml
