@@ -34,7 +34,7 @@ pub struct TodosGroupedByDate {
     pub todos: Vec<Todo>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WebSocketMessage {
     pub message_type: String,
     pub data: serde_json::Value,

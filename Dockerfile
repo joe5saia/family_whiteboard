@@ -34,9 +34,11 @@ FROM nginx:alpine
 RUN apk add --no-cache postgresql-client
 
 # Copy static files
-COPY index.html /usr/share/nginx/html/
-COPY styles.css /usr/share/nginx/html/
-COPY app.js /usr/share/nginx/html/
+COPY frontend/index.html /usr/share/nginx/html/
+COPY frontend/styles.css /usr/share/nginx/html/
+COPY frontend/app.js /usr/share/nginx/html/
+COPY frontend/app-wasm.js /usr/share/nginx/html/
+COPY frontend/api-client.js /usr/share/nginx/html/
 
 # Copy WASM artifacts
 COPY --from=builder /app/pkg /usr/share/nginx/html/pkg/

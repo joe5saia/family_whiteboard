@@ -29,9 +29,11 @@ A modern web application built with Rust + WebAssembly for the backend logic and
 - **Connection pooling** - Efficient database connection management
 
 ### Frontend
-- **`index.html`** - Clean HTML structure with semantic markup
-- **`styles.css`** - Organized CSS with component-based styling
-- **`app.js`** - Modular JavaScript controller with class-based architecture
+- **`frontend/index.html`** - Clean HTML structure with semantic markup
+- **`frontend/styles.css`** - Organized CSS with component-based styling
+- **`frontend/app.js`** - Modular JavaScript controller with class-based architecture
+- **`frontend/app-wasm.js`** - WebAssembly integration module
+- **`frontend/api-client.js`** - API client for backend communication
 
 ### Generated Files
 - **`pkg/`** - WASM bindings and JavaScript glue code (auto-generated)
@@ -70,7 +72,7 @@ wasm-pack build --target web
 
 **Local Development Server:**
 ```bash
-python3 -m http.server 8000
+cd frontend && python3 -m http.server 8000
 ```
 Then open http://localhost:8000
 

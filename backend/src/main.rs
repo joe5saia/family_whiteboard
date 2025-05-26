@@ -19,7 +19,7 @@ use crate::database::Database;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Initialize tracing
-    tracing_subscriber::init();
+    tracing_subscriber::fmt::init();
     
     // Load environment variables
     dotenv::dotenv().ok();

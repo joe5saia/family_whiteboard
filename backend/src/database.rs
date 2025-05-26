@@ -1,6 +1,5 @@
 use anyhow::Result;
-use chrono::NaiveDate;
-use sqlx::{PgPool, Row};
+use sqlx::PgPool;
 use std::collections::HashMap;
 
 use crate::models::{Todo, CreateTodoRequest, UpdateTodoRequest, TodosGroupedByDate};
